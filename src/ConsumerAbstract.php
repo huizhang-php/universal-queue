@@ -7,10 +7,15 @@
  */
 namespace Huizhang\DelayQueue;
 
-interface ConsumerInterface {
+abstract class ConsumerAbstract {
 
-    public function init();
-    public function deal(array $data);
-    public function exception(\Throwable $e);
+    /** @var $queue Queue*/
+    public $queue;
+
+    public function init() {
+
+    }
+
+    abstract public function deal(array $data);
 
 }

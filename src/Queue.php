@@ -14,10 +14,10 @@ class Queue extends SplBean
 
     protected $alias;
     protected $redisAlias;
-    protected $limit;
+    protected $limit=100;
     protected $class;
     protected $delayTime;
-    protected $coroutineNum;
+    protected $coroutineNum=3;
 
     public function getRedisAlias(): string
     {

@@ -34,7 +34,8 @@ class Config extends SplBean
 
     public function setQueues(array $queues): self
     {
-        foreach ($queues as $queue) {
+        foreach ($queues as $alias => $queue) {
+            $queue['alias'] = $alias;
             $this->queues[$queue['alias']] = new Queue($queue);
         }
         return $this;
