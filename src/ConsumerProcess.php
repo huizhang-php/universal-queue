@@ -48,7 +48,7 @@ class ConsumerProcess extends AbstractUnixProcess
                             $consumer->deal($data);
                         }
                     } catch (\Throwable $e) {
-                        $consumer->throwException($e, $data);
+                        $consumer->onException($e, $data??[]);
                         break;
                     }
                     Coroutine::sleep(1);

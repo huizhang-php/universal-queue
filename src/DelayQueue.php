@@ -70,7 +70,7 @@ class DelayQueue
 
     private function getSock(string $queueAlias)
     {
-        $temp = EASYSWOOLE_ROOT . '/Temp/';
+        $temp = EASYSWOOLE_ROOT . '/Temp';
         return "{$temp}/DelayQueue.{$queueAlias}.sock";
     }
 

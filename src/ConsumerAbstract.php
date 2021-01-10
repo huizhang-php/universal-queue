@@ -7,6 +7,8 @@
  */
 namespace Huizhang\DelayQueue;
 
+use EasySwoole\EasySwoole\Logger;
+
 abstract class ConsumerAbstract {
 
     /** @var $queue Queue*/
@@ -16,9 +18,9 @@ abstract class ConsumerAbstract {
 
     }
 
-    public function throwException(\Throwable $e, array $data)
+    public function onException(\Throwable $e, array $data)
     {
-
+        Logger::getInstance()->waring($e);
     }
 
     abstract public function deal(array $data);

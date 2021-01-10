@@ -17,7 +17,6 @@ class Config extends SplBean
     use Singleton;
 
     private $queues;
-    private $redisClient;
     private $mem='1024M';
 
     public function getQueues()
