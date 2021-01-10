@@ -43,15 +43,16 @@ class ConsumerProcess extends AbstractUnixProcess
                             , time() - $queue->getDelayTime()
                             , $queue->getLimit()
                         );
-                        // TODO:: 从延迟队列取出的数据，要进行文件缓存
-                        if (!empty($data)) {
+                        // TODO:: 对数据，进行文件缓存
+                        if (empty($data)) {
+                            Coroutine::sleep(1);
+                        } else {
                             $consumer->deal($data);
                         }
                     } catch (\Throwable $e) {
                         $consumer->onException($e, $data??[]);
                         break;
                     }
-                    Coroutine::sleep(1);
                 }
             });
         }
