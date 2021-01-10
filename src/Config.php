@@ -18,14 +18,7 @@ class Config extends SplBean
 
     private $queues;
     private $redisClient;
-    private $sockDIR;
-
-    protected function initialize(): void
-    {
-        if (empty($this->sockDIR)) {
-            $this->sockDIR = sys_get_temp_dir();
-        }
-    }
+    private $mem='1024M';
 
     public function getQueues()
     {
@@ -41,24 +34,15 @@ class Config extends SplBean
         return $this;
     }
 
-    public function getRedisClient(): ?RedisConnInterface
+    public function getMem(): string
     {
-        return $this->redisClient;
+        return $this->mem;
     }
 
-    public function setRedisClient(RedisConnInterface $redisClient): void
+    public function setMem(string $mem): self
     {
-        $this->redisClient = $redisClient;
-    }
-
-    public function getSockDIR(): string
-    {
-        return $this->sockDIR;
-    }
-
-    public function setSockDIR(string $sockDIR): void
-    {
-        $this->sockDIR = $sockDIR;
+        $this->mem = $mem;
+        return $this;
     }
 
 }

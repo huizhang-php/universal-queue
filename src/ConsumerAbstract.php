@@ -16,6 +16,11 @@ abstract class ConsumerAbstract {
 
     }
 
+    public function throwException(\Throwable $e, array $data)
+    {
+
+    }
+
     abstract public function deal(array $data);
 
 }

@@ -27,10 +27,6 @@ class DelayQueue
             throw new DelayQueueException('Queues is empty!');
         }
 
-        if (!($this->config->getRedisClient() instanceof RedisConnInterface)) {
-            $this->config->setRedisClient(new DefaultRedisClient());
-        }
-
         $this->checkQueues();
     }
 
@@ -74,7 +70,8 @@ class DelayQueue
 
     private function getSock(string $queueAlias)
     {
-        return "{$this->config->getSockDIR()}/DelayQueue.{$queueAlias}.sock";
+        $temp = EASYSWOOLE_ROOT . '/Temp/';
+        return "{$temp}/DelayQueue.{$queueAlias}.sock";
     }
 
     public function push(string $alias, string $data)
