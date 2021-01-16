@@ -17,7 +17,18 @@ class Config extends SplBean
     use Singleton;
 
     private $queues;
-    private $mem='1024M';
+    private $tempDir = EASYSWOOLE_ROOT . '/Temp/';
+
+    public function getTempDir()
+    {
+        return $this->tempDir;
+    }
+
+    public function setTempDir(string $tempDir)
+    {
+        $this->tempDir = $tempDir;
+        return $this;
+    }
 
     public function getQueues()
     {
@@ -26,21 +37,13 @@ class Config extends SplBean
 
     public function setQueues(array $queues): self
     {
+        $number = 0;
         foreach ($queues as $alias => $queue) {
             $queue['alias'] = $alias;
+            $queue['number'] = $number;
             $this->queues[$queue['alias']] = new Queue($queue);
+            ++$number;
         }
-        return $this;
-    }
-
-    public function getMem(): string
-    {
-        return $this->mem;
-    }
-
-    public function setMem(string $mem): self
-    {
-        $this->mem = $mem;
         return $this;
     }
 

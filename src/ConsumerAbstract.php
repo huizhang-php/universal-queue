@@ -14,13 +14,12 @@ abstract class ConsumerAbstract {
     /** @var $queue Queue*/
     public $queue;
 
-    public function init() {
-
+    final public function __construct()
+    {
     }
 
-    public function onException(\Throwable $e, array $data)
-    {
-        Logger::getInstance()->waring($e);
+    public function init() {
+
     }
 
     abstract public function deal(array $data);

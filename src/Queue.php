@@ -18,6 +18,7 @@ class Queue extends SplBean
     protected $class;
     protected $delayTime;
     protected $coroutineNum=3;
+    protected $number;
 
     public function getRedisAlias(): string
     {
@@ -47,6 +48,11 @@ class Queue extends SplBean
     public function getDelayTime()
     {
         return $this->delayTime;
+    }
+
+    public function getNumber(): int
+    {
+        return $this->number;
     }
 
 }
