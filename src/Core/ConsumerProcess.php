@@ -22,6 +22,12 @@ class ConsumerProcess extends AbstractUnixProcess
         /** @var $queue Queue */
         $queue = $config->getArg();
         QueueDataCache::init($queue);
+        $this->addTick(30000, function () use ($queue) {
+            $logFile = QueueDataCache::getCurrentLogFile($queue->getAlias(), time()-60*60*$queue->getRetainLogNumber());
+            if (file_exists($logFile)) {
+                unlink($logFile);
+            }
+        });
         parent::__construct($config);
     }
 
@@ -39,6 +45,7 @@ class ConsumerProcess extends AbstractUnixProcess
                         $data = QueueDataCache::read($cacheFile, $queue->getLimit());
                         if (empty($data)) {
                             $data = $queue->getDriver()->pop($queue);
+                            QueueDataCache::write(QueueDataCache::getCurrentLogFile($queue->getAlias()), $data);
                         }
 
                         QueueDataCache::write($cacheFile, $data);

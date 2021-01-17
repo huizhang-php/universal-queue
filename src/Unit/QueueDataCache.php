@@ -130,9 +130,17 @@ class QueueDataCache
     public static function getCoroutineCacheFile(string $queueAlias, string $coroutineNumber)
     {
         return sprintf(
-            '%s/%s.log'
+            '%s/%s.temp'
             , self::getCacheDir($queueAlias), $coroutineNumber
         );
+    }
+
+    public static function getCurrentLogFile(string $queueAlias, int $time=null)
+    {
+        if (is_null($time)) {
+            $time = time();
+        }
+        return sprintf("%s/%s.log", self::getLogDir($queueAlias), date('YmdH', $time));
     }
 
 }
