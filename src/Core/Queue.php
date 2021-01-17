@@ -20,9 +20,7 @@ class Queue extends SplBean
     protected $limit = 100;
     protected $consumer;
     protected $driver;
-    protected $delayTime;
     protected $coroutineNum = 3;
-    protected $number;
     protected $other = [];
 
     public function getCoroutineNum()
@@ -43,16 +41,6 @@ class Queue extends SplBean
     public function getConsumer(): ConsumerAbstract
     {
         return $this->consumer;
-    }
-
-    public function getDelayTime()
-    {
-        return $this->delayTime;
-    }
-
-    public function getNumber(): int
-    {
-        return $this->number;
     }
 
     public function setNumber(int $number): void

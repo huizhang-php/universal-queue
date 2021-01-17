@@ -41,7 +41,6 @@ class Config extends SplBean
         $number = 0;
         foreach ($queues as $alias => $queue) {
             $queue['alias'] = $alias;
-            $queue['number'] = $number;
             $this->queues[$queue['alias']] = new Queue($queue);
             ++$number;
         }
