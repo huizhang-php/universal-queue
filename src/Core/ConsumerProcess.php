@@ -21,7 +21,7 @@ class ConsumerProcess extends AbstractUnixProcess
     {
         /** @var $queue Queue */
         $queue = $config->getArg();
-        QueueDataCache::getInstance()->init($queue);
+        QueueDataCache::init($queue);
         parent::__construct($config);
     }
 
@@ -33,7 +33,7 @@ class ConsumerProcess extends AbstractUnixProcess
         for ($i = 0; $i < $queue->getCoroutineNum(); $i++) {
             $queue->getConsumer()->queue = $queue;
             Coroutine::create(function () use ($queue, $i) {
-                $cacheFile = QueueDataCache::getCacheFile($queue->getAlias(), $i);
+                $cacheFile = QueueDataCache::getCoroutineCacheFile($queue->getAlias(), $i);
                 while (true) {
                     try {
                         $data = QueueDataCache::read($cacheFile, $queue->getLimit());

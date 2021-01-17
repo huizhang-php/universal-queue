@@ -8,41 +8,35 @@
 
 namespace Huizhang\UniversalQueue\Unit;
 
-use EasySwoole\Component\Singleton;
 use Huizhang\UniversalQueue\Config;
 use Huizhang\UniversalQueue\Core\Queue;
 
 class QueueDataCache
 {
-    use Singleton;
-
-    public function init(Queue $queue)
+    public static function init(Queue $queue)
     {
-        $this->mkdir(QueueDataCache::getTempDir($queue->getAlias()));
-        $this->createFile($queue);
-        $this->mergeCannotConsumedFile($queue);
+        self::mkdir(QueueDataCache::getCacheDir($queue->getAlias()));
+        self::mkdir(QueueDataCache::getLogDir($queue->getAlias()));
+        self::createFile($queue);
+        self::mergeCannotConsumedFile($queue);
     }
 
-    private function createFile(Queue $queue)
+    private static function createFile(Queue $queue)
     {
-        $file = QueueDataCache::getCacheFile($queue->getAlias(), 'error');
-        if (!file_exists($file)) {
-            fclose(fopen($file, 'a+'));
-        }
         for ($i = 0; $i < $queue->getCoroutineNum(); $i++) {
-            $file = QueueDataCache::getCacheFile($queue->getAlias(), $i);
+            $file = QueueDataCache::getCoroutineCacheFile($queue->getAlias(), $i);
             if (file_exists($file)) {
                 fclose(fopen($file, 'a+'));
             }
         }
     }
 
-    private function mergeCannotConsumedFile(Queue $queue)
+    private static function mergeCannotConsumedFile(Queue $queue)
     {
-        $targetCacheFile = QueueDataCache::getCacheFile($queue->getAlias(), 0);
+        $targetCacheFile = QueueDataCache::getCoroutineCacheFile($queue->getAlias(), 0);
         $number = $queue->getCoroutineNum();
         while (true) {
-            $currentCachefile = QueueDataCache::getCacheFile($queue->getAlias(), $number);
+            $currentCachefile = QueueDataCache::getCoroutineCacheFile($queue->getAlias(), $number);
             if (!file_exists($currentCachefile)) {
                 break;
             }
@@ -51,13 +45,13 @@ class QueueDataCache
         }
     }
 
-    private function mkdir($dir)
+    public static function mkdir($dir)
     {
         if (!(is_dir($dir) || @mkdir($dir, 0777))) {
             $dirArr = explode('/', $dir);
             array_pop($dirArr);
             $newDir = implode('/', $dirArr);
-            $this->mkdir($newDir);
+            self::mkdir($newDir);
             @mkdir($dir, 0777);
         }
     }
@@ -109,19 +103,35 @@ class QueueDataCache
         }
     }
 
-    public static function getTempDir(string $queueAlias)
+    public static function getLogDir(string $queueAlias)
     {
         return sprintf(
-            '%sQueueCache/%s/'
-            , Config::getInstance()->getTempDir(), $queueAlias
+            '%s/%s/Log'
+            , self::getUniversalQueueDir(), $queueAlias
         );
     }
 
-    public static function getCacheFile(string $queueAlias, string $coroutineNumber)
+    public static function getCacheDir(string $queueAlias)
     {
         return sprintf(
-            '%s%s.log'
-            , self::getTempDir($queueAlias), $coroutineNumber
+            '%s/%s/Cache'
+            , self::getUniversalQueueDir(), $queueAlias
+        );
+    }
+
+    public static function getUniversalQueueDir()
+    {
+        return sprintf(
+            '%sUniversalQueue'
+            , Config::getInstance()->getTempDir()
+        );
+    }
+
+    public static function getCoroutineCacheFile(string $queueAlias, string $coroutineNumber)
+    {
+        return sprintf(
+            '%s/%s.log'
+            , self::getCacheDir($queueAlias), $coroutineNumber
         );
     }
 

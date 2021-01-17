@@ -13,6 +13,7 @@ use EasySwoole\Component\Singleton;
 use Huizhang\UniversalQueue\Core\ConsumerProcess;
 use Huizhang\UniversalQueue\Core\Queue;
 use Huizhang\UniversalQueue\Exception\UniversalQueueException;
+use Huizhang\UniversalQueue\Unit\QueueDataCache;
 use Swoole\Server;
 
 class UniversalQueue
@@ -31,6 +32,7 @@ class UniversalQueue
         }
 
         $this->checkQueues();
+        QueueDataCache::mkdir(QueueDataCache::getUniversalQueueDir());
     }
 
     private function checkQueues()
