@@ -1,5 +1,5 @@
 {
-  "name": "huizhang/delay-queue",
+  "name": "huizhang/universal-queue",
   "description": "A simple delay-queue implementation integrated into easySwoole",
   "type": "library",
   "keywords": [
@@ -11,7 +11,7 @@
   "license": "Apache-2.0",
   "autoload": {
     "psr-4": {
-      "Huizhang\\DelayQueue\\": "src/"
+      "Huizhang\\UniversalQueue\\": "src/"
     }
   },
   "require": {
