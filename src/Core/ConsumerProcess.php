@@ -23,7 +23,7 @@ class ConsumerProcess extends AbstractUnixProcess
         $queue = $config->getArg();
         QueueDataCache::init($queue);
         $this->addTick(30000, function () use ($queue) {
-            $logFile = QueueDataCache::getCurrentLogFile($queue->getAlias(), time()-60*60*$queue->getRetainLogNumber());
+            $logFile = QueueDataCache::getCurrentLogFile($queue->getAlias(), time()-60*60*$queue->getRetainLogNum());
             if (file_exists($logFile)) {
                 unlink($logFile);
             }
