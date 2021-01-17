@@ -130,7 +130,7 @@ class QueueDataCache
     public static function getCoroutineCacheFile(string $queueAlias, string $coroutineNumber)
     {
         return sprintf(
-            '%s/%s.temp'
+            '%s/%s.cache'
             , self::getCacheDir($queueAlias), $coroutineNumber
         );
     }
