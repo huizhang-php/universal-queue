@@ -3,14 +3,13 @@
  * @CreateTime:   2021/1/3 1:21 上午
  * @Author:       huizhang  <2788828128@qq.com>
  * @Copyright:    copyright(2020) Easyswoole all rights reserved
- * @Description:  延迟队列进程处理
+ * @Description:  消费进程
  */
 
 namespace Huizhang\UniversalQueue\Core;
 
 use EasySwoole\Component\Process\Socket\AbstractUnixProcess;
 use EasySwoole\Component\Process\Socket\UnixProcessConfig;
-use Huizhang\UniversalQueue\Driver\RedisDelayQueue;
 use Huizhang\UniversalQueue\Unit\QueueDataCache;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Socket;
@@ -30,13 +29,10 @@ class ConsumerProcess extends AbstractUnixProcess
     {
         /** @var $queue Queue */
         $queue = $arg;
-        /** @var $consumer ConsumerAbstract */
-        $namespace = "{$queue->getClass()}";
-        $consumer = new $namespace;
-        $consumer->queue = $queue;
-        $consumer->init();
+        $queue->getConsumer()->queue = $queue;
+        $queue->getConsumer()->init();
         for ($i = 0; $i < $queue->getCoroutineNum(); $i++) {
-            Coroutine::create(function () use ($queue, $consumer, $i) {
+            Coroutine::create(function () use ($queue, $i) {
                 $cacheFile = QueueDataCache::getCacheFile($queue->getAlias(), $i);
                 $errorCacheFile = QueueDataCache::getCacheFile($queue->getAlias(), 'error');
                 $failTimes = 0;
@@ -50,20 +46,14 @@ class ConsumerProcess extends AbstractUnixProcess
                             $isErrData = true;
                         }
                         if (empty($data)) {
-                            $data = RedisDelayQueue::getInstance()
-                                ->pop(
-                                    $queue->getRedisAlias()
-                                    , $queue->getAlias()
-                                    , time() - $queue->getDelayTime()
-                                    , $queue->getLimit()
-                                );
+                            $data = $queue->getDriver()->pop($queue, $queue->getLimit());
                             if (empty($data)) {
                                 QueueDataCache::write($cacheFile, $data);
                             }
                         }
 
                         if (!empty($data)) {
-                            $consumer->deal($data);
+                            $queue->getConsumer()->deal($data);
                             if ($isErrData) {
                                 QueueDataCache::rem($errorCacheFile, count($data));
                             } else {

@@ -5,27 +5,25 @@
  * @Copyright:    copyright(2020) Easyswoole all rights reserved
  * @Description:  每个延迟队列的配置信息
  */
+
 namespace Huizhang\UniversalQueue\Core;
 
 use EasySwoole\Component\Singleton;
 use EasySwoole\Spl\SplBean;
+use Huizhang\UniversalQueue\Driver\QueueDriverInterface;
 
 class Queue extends SplBean
 {
     use Singleton;
 
     protected $alias;
-    protected $redisAlias;
-    protected $limit=100;
-    protected $class;
+    protected $limit = 100;
+    protected $consumer;
+    protected $driver;
     protected $delayTime;
-    protected $coroutineNum=3;
+    protected $coroutineNum = 3;
     protected $number;
-
-    public function getRedisAlias(): string
-    {
-        return $this->redisAlias;
-    }
+    protected $other = [];
 
     public function getCoroutineNum()
     {
@@ -42,9 +40,9 @@ class Queue extends SplBean
         return $this->limit;
     }
 
-    public function getClass()
+    public function getConsumer(): ConsumerAbstract
     {
-        return $this->class;
+        return $this->consumer;
     }
 
     public function getDelayTime()
@@ -60,6 +58,16 @@ class Queue extends SplBean
     public function setNumber(int $number): void
     {
         $this->number = $number;
+    }
+
+    public function getOther(): array
+    {
+        return $this->other;
+    }
+
+    public function getDriver(): QueueDriverInterface
+    {
+        return $this->driver;
     }
 
 }

@@ -12,7 +12,6 @@ use EasySwoole\Component\Process\Socket\UnixProcessConfig;
 use EasySwoole\Component\Singleton;
 use Huizhang\UniversalQueue\Core\ConsumerProcess;
 use Huizhang\UniversalQueue\Core\Queue;
-use Huizhang\UniversalQueue\Driver\RedisDelayQueue;
 use Huizhang\UniversalQueue\Exception\UniversalQueueException;
 use Swoole\Server;
 
@@ -45,15 +44,9 @@ class UniversalQueue
             if ($queue->getLimit() < 0) {
                 throw new UniversalQueueException("The limit for {$queue->getAlias()} is illegal!");
             }
-            $class = new \ReflectionClass($queue->getClass());
+            $class = new \ReflectionClass(get_class($queue->getConsumer()));
             if ('Huizhang\UniversalQueue\Core\ConsumerAbstract' !== $class->getParentClass()->getName()) {
                 throw new UniversalQueueException("{$queue->getAlias()} consumers must implement ConsumerInterface!");
-            }
-            if ($queue->getDelayTime() < 0) {
-                throw new UniversalQueueException("The delayTime for {$queue->getAlias()} is illegal!");
-            }
-            if (empty($queue->getRedisAlias())) {
-                throw new UniversalQueueException("Alias of {$queue->getAlias()} cannot be empty!");
             }
         }
     }
@@ -78,12 +71,12 @@ class UniversalQueue
         return "{$temp}/DelayQueue.{$queueAlias}.sock";
     }
 
-    public function push(string $alias, string $data)
+    public function push(string $queueAlias, string $data)
     {
         $queues = $this->config->getQueues();
-        /** @var $queue Queue */
-        $queue = $queues[$alias];
-        return RedisDelayQueue::getInstance()->push($queue->getRedisAlias(), $queue->getAlias(), time(), $data);
+        /** @var $queue Queue*/
+        $queue = $queues[$queueAlias];
+        return $queue->getDriver()->push($queue, $data);
     }
 
 }

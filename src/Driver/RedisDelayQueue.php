@@ -5,29 +5,35 @@
  * @Copyright:    copyright(2020) Easyswoole all rights reserved
  * @Description:  延迟队列核心方法
  */
+
 namespace Huizhang\UniversalQueue\Driver;
 
 use EasySwoole\Component\Singleton;
 use EasySwoole\Redis\Redis;
 use EasySwoole\Redis\Response;
 use EasySwoole\RedisPool\RedisPool;
+use Huizhang\UniversalQueue\Core\Queue;
 
-class RedisDelayQueue {
+class RedisDelayQueue implements QueueDriverInterface
+{
 
     use Singleton;
 
     private $scriptSha1;
 
-    public function push(string $redisAlias, string $delayQueueAlias, int $score, string $data)
+    public function push(Queue $queue, string $data)
     {
-        return RedisPool::invoke(function (Redis $redis) use ($delayQueueAlias, $score, $data) {
-            return $redis->zAdd($delayQueueAlias, $score, $data);
-        }, $redisAlias);
+        $other = $queue->getOther();
+        return RedisPool::invoke(function (Redis $redis) use ($queue, $data) {
+            return $redis->zAdd($queue->getAlias(), time(), $data);
+        }, $other['redisAlias']);
     }
 
-    public function pop(string $redisAlias, string $delayQueueAlias, int $score, int $limit): array
+    public function pop(Queue $queue, int $limit): array
     {
-        return RedisPool::invoke(function (Redis $redis) use ($delayQueueAlias, $score, $limit) {
+        $other = $queue->getOther();
+        return RedisPool::invoke(function (Redis $redis) use ($queue, $limit) {
+            $other = $queue->getOther();
             $result = [];
             if (empty($this->scriptSha1)) {
                 $script = <<<EOF
@@ -36,14 +42,13 @@ EOF;
                 $loadResult = $redis->rawCommand(['SCRIPT', 'LOAD', $script]);
                 $this->scriptSha1 = $loadResult->getData();
             }
-            /** @var $data Response*/
-            $data = $redis->rawCommand(['EVALSHA', $this->scriptSha1, 1, $delayQueueAlias, $score]);
-            if ($data->getStatus() === 0)
-            {
+            /** @var $data Response */
+            $data = $redis->rawCommand(['EVALSHA', $this->scriptSha1, 1, $queue->getAlias(), time() - $other['delayTime']]);
+            if ($data->getStatus() === 0) {
                 $result = $data->getData();
             }
             return $result;
-        }, $redisAlias);
+        }, $other['redisAlias']);
     }
 
 }
