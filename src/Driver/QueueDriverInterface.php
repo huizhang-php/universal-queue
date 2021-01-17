@@ -12,7 +12,7 @@ use Huizhang\UniversalQueue\Core\Queue;
  */
 interface QueueDriverInterface
 {
-    public function pop(Queue $queue, int $limit): array;
+    public function pop(Queue $queue): array;
 
     public function push(Queue $queue, string $data);
 }

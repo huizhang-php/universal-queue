@@ -34,40 +34,21 @@ class ConsumerProcess extends AbstractUnixProcess
         for ($i = 0; $i < $queue->getCoroutineNum(); $i++) {
             Coroutine::create(function () use ($queue, $i) {
                 $cacheFile = QueueDataCache::getCacheFile($queue->getAlias(), $i);
-                $errorCacheFile = QueueDataCache::getCacheFile($queue->getAlias(), 'error');
-                $failTimes = 0;
                 while (true) {
                     try {
-                        $data = QueueDataCache::read($errorCacheFile, $queue->getLimit());
+                        $data = QueueDataCache::read($cacheFile, $queue->getLimit());
                         if (empty($data)) {
-                            $data = QueueDataCache::read($cacheFile, $queue->getLimit());
-                            $isErrData = false;
-                        } else {
-                            $isErrData = true;
+                            $data = $queue->getDriver()->pop($queue);
                         }
-                        if (empty($data)) {
-                            $data = $queue->getDriver()->pop($queue, $queue->getLimit());
-                            if (empty($data)) {
-                                QueueDataCache::write($cacheFile, $data);
-                            }
-                        }
+
+                        QueueDataCache::write($cacheFile, $data);
 
                         if (!empty($data)) {
                             $queue->getConsumer()->deal($data);
-                            if ($isErrData) {
-                                QueueDataCache::rem($errorCacheFile, count($data));
-                            } else {
-                                QueueDataCache::rem($cacheFile, count($data));
-                            }
+                            QueueDataCache::rem($cacheFile, count($data));
                         }
-
-                        $failTimes = 0;
                     } catch (\Throwable $e) {
-                        ++$failTimes;
-                        if ($failTimes >= 3) {
-                            QueueDataCache::mergeAtoBAndUnlinkA($cacheFile, $errorCacheFile);
-                            break;
-                        }
+                        break;
                     }
                     Coroutine::sleep(0.01);
                 }
