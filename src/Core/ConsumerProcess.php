@@ -45,7 +45,11 @@ class ConsumerProcess extends AbstractUnixProcess
                         $data = QueueDataCache::read($cacheFile, $queue->getLimit());
                         if (empty($data)) {
                             $data = $queue->getDriver()->pop($queue);
-                            QueueDataCache::write(QueueDataCache::getCurrentLogFile($queue->getAlias()), $data);
+                            $logs = [];
+                            foreach ($data as $item) {
+                                $logs[] = sprintf("%s\t%s", date('i:s'), $item);
+                            }
+                            QueueDataCache::write(QueueDataCache::getCurrentLogFile($queue->getAlias()), $logs);
                         }
 
                         QueueDataCache::write($cacheFile, $data);
