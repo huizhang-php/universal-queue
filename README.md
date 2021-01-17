@@ -1,8 +1,10 @@
-# DelayQueue(延迟队列)
+# EasySwoole 通用队列组件
 
-- 利用Redis(有序列表)+Lua实现延迟队列
-- 利用自定义进程实现各延迟队列的隔离
-- 利用协程实现并发消费
+- 支持基于Redis延迟队列
+- 支持消费数据先落盘防止异常丢失数据
+- 支持队列数据消费日志保留
+
+> 后续会支持更多消息中间件的消费驱动
 
 ### 定义消费者
 
@@ -10,7 +12,7 @@
 <?php
 namespace App\DelayQueue;
 
-use Huizhang\UniversalQueue\ConsumerAbstract;
+use Huizhang\UniversalQueue\Core\ConsumerAbstract;
 
 class DelayQueue1 extends ConsumerAbstract
 {
@@ -27,11 +29,6 @@ class DelayQueue1 extends ConsumerAbstract
 
     }
 
-    public function onException(\Throwable $e, array $data)
-    {
-
-    }
-
 }
 
 ````
@@ -44,7 +41,9 @@ namespace EasySwoole\EasySwoole;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\Redis\Config\RedisConfig;
+use Huizhang\UniversalQueue\Driver\RedisDelayQueue;
 use Huizhang\UniversalQueue\UniversalQueue;
+use App\DelayQueue\DelayQueue1;
 
 class EasySwooleEvent implements Event
 {
@@ -63,34 +62,41 @@ class EasySwooleEvent implements Event
             $redisConfig,
             'redis1'
         );
-
         $config = \Huizhang\UniversalQueue\Config::getInstance()
             ->setQueues([
-                // 延迟队列别名
+                // 队列名称
                 'test' => [
-                    'redisAlias' => 'redis1', // 所使用的redis
                     'limit' => 100, // 每个协程取出的最大消息数
-                    'class' => '\\App\\DelayQueue\\DelayQueue1', // 消费者
-                    'delayTime' => 3, // 延迟时间
-                    'coroutineNum' => 1 // 协程数
+                    'driver' => new RedisDelayQueue(), // 队列驱动
+                    'consumer' => new DelayQueue1(), // 消费者
+                    'coroutineNum' => 1, // 协程数
+                    'retainLogNumber' => 3, // 消费日志最大保存个数(以小时分割)
+                    'other' => [
+                        'redisAlias' => 'redis1', // 延迟队列redis所需配置
+                        'delayTime' => 3 // 延迟时间
+                    ]
                 ],
+                // 队列名称
                 'test2' => [
-                    'redisAlias' => 'redis1',
-                    'limit' => 100,
-                    'class' => '\\App\\DelayQueue\\DelayQueue2',
-                    'delayTime' => 3,
-                    'coroutineNum' => 2
-                ]
+                    'limit' => 100, // 每个协程取出的最大消息数
+                    'driver' => new RedisDelayQueue(), // 队列驱动
+                    'consumer' => new DelayQueue1(), // 消费者
+                    'coroutineNum' => 3, // 协程数
+                    'other' => [
+                        'redisAlias' => 'redis1', // 延迟队列redis所需配置
+                        'delayTime' => 3 // 延迟时间
+                    ]
+                ],
             ]);
         UniversalQueue::getInstance($config)->attachServer(ServerManager::getInstance()->getSwooleServer());
     }
 
 }
+
 ````
 
-### 方法
+### 生产消息 
 
 ````php
-    DelayQueue::getInstance()->push('test', 123);
-    DelayQueue::getInstance()->rem('test', 123);
+    UniversalQueue::getInstance()->push('test', 123);
 ````
