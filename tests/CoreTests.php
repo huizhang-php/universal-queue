@@ -1,11 +1,11 @@
 <?php
 
-namespace Huizhang\DelayQueue\Tests;
+namespace Huizhang\UniversalQueue\Tests;
 
 use EasySwoole\Redis\Config\RedisConfig;
 use EasySwoole\RedisPool\RedisPool;
 use PHPUnit\Framework\TestCase;
-use Huizhang\DelayQueue\Core;
+use Huizhang\UniversalQueue\RedisDelayQueue;
 
 /**
  * @CreateTime:   2021/1/11 12:25 上午
@@ -23,23 +23,23 @@ class CoreTests extends TestCase
     {
         $this->initRedisPool();
         $score = $this->getTime();
-        $res = Core::getInstance()->push(self::REDIS_ALIAS, self::DELAY_QUEUE_ALIAS, $score, 123);
+        $res = RedisDelayQueue::getInstance()->push(self::REDIS_ALIAS, self::DELAY_QUEUE_ALIAS, $score, 123);
         $this->assertEquals($res, 1);
     }
 
     public function testPop()
     {
-        $res = Core::getInstance()->pop(self::REDIS_ALIAS, self::DELAY_QUEUE_ALIAS, time()-3, 1);
+        $res = RedisDelayQueue::getInstance()->pop(self::REDIS_ALIAS, self::DELAY_QUEUE_ALIAS, time()-3, 1);
         $this->assertEquals($res, ['123']);
     }
 
     public function testRem()
     {
-        $res = Core::getInstance()->rem(self::REDIS_ALIAS, self::DELAY_QUEUE_ALIAS, 123);
+        $res = RedisDelayQueue::getInstance()->rem(self::REDIS_ALIAS, self::DELAY_QUEUE_ALIAS, 123);
         $this->assertEquals($res, 0);
         $score = $this->getTime();
-        Core::getInstance()->push(self::REDIS_ALIAS, self::DELAY_QUEUE_ALIAS, $score, 123);
-        $res = Core::getInstance()->rem(self::REDIS_ALIAS, self::DELAY_QUEUE_ALIAS, 123);
+        RedisDelayQueue::getInstance()->push(self::REDIS_ALIAS, self::DELAY_QUEUE_ALIAS, $score, 123);
+        $res = RedisDelayQueue::getInstance()->rem(self::REDIS_ALIAS, self::DELAY_QUEUE_ALIAS, 123);
         $this->assertEquals($res, 1);
     }
 

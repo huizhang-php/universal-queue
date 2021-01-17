@@ -10,7 +10,7 @@
 <?php
 namespace App\DelayQueue;
 
-use Huizhang\DelayQueue\ConsumerAbstract;
+use Huizhang\UniversalQueue\ConsumerAbstract;
 
 class DelayQueue1 extends ConsumerAbstract
 {
@@ -44,7 +44,7 @@ namespace EasySwoole\EasySwoole;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\Redis\Config\RedisConfig;
-use Huizhang\DelayQueue\DelayQueue;
+use Huizhang\UniversalQueue\UniversalQueue;
 
 class EasySwooleEvent implements Event
 {
@@ -64,7 +64,7 @@ class EasySwooleEvent implements Event
             'redis1'
         );
 
-        $config = \Huizhang\DelayQueue\Config::getInstance()
+        $config = \Huizhang\UniversalQueue\Config::getInstance()
             ->setQueues([
                 // 延迟队列别名
                 'test' => [
@@ -82,7 +82,7 @@ class EasySwooleEvent implements Event
                     'coroutineNum' => 2
                 ]
             ]);
-        DelayQueue::getInstance($config)->attachServer(ServerManager::getInstance()->getSwooleServer());
+        UniversalQueue::getInstance($config)->attachServer(ServerManager::getInstance()->getSwooleServer());
     }
 
 }

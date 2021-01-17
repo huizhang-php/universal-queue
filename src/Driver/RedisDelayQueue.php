@@ -5,14 +5,14 @@
  * @Copyright:    copyright(2020) Easyswoole all rights reserved
  * @Description:  延迟队列核心方法
  */
-namespace Huizhang\DelayQueue;
+namespace Huizhang\UniversalQueue\Driver;
 
 use EasySwoole\Component\Singleton;
 use EasySwoole\Redis\Redis;
 use EasySwoole\Redis\Response;
 use EasySwoole\RedisPool\RedisPool;
 
-class Core {
+class RedisDelayQueue {
 
     use Singleton;
 
@@ -43,13 +43,6 @@ EOF;
                 $result = $data->getData();
             }
             return $result;
-        }, $redisAlias);
-    }
-
-    public function rem(string $redisAlias, string $delayQueueAlias, string $data)
-    {
-        return RedisPool::invoke(function (Redis $redis) use ($delayQueueAlias, $data) {
-            return $redis->zRem($delayQueueAlias, $data);
         }, $redisAlias);
     }
 

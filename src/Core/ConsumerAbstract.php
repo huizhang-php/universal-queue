@@ -5,9 +5,7 @@
  * @Copyright:    copyright(2020) Easyswoole all rights reserved
  * @Description:  消费者要实现的接口
  */
-namespace Huizhang\DelayQueue;
-
-use EasySwoole\EasySwoole\Logger;
+namespace Huizhang\UniversalQueue\Core;
 
 abstract class ConsumerAbstract {
 

@@ -6,10 +6,11 @@
  * @Description:  延迟队列所需配置
  */
 
-namespace Huizhang\DelayQueue;
+namespace Huizhang\UniversalQueue;
 
 use EasySwoole\Component\Singleton;
 use EasySwoole\Spl\SplBean;
+use Huizhang\UniversalQueue\Core\Queue;
 
 class Config extends SplBean
 {

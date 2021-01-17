@@ -5,9 +5,9 @@
  * @Copyright:    copyright(2020) Easyswoole all rights reserved
  * @Description:  关于延迟队列组件的异常
  */
-namespace Huizhang\DelayQueue;
+namespace Huizhang\UniversalQueue\Exception;
 
-class DelayQueueException extends \Exception
+class UniversalQueueException extends \Exception
 {
 
 }

@@ -5,12 +5,14 @@
  * @Copyright:    copyright(2020) Easyswoole all rights reserved
  * @Description:  每个延迟队列的配置信息
  */
-namespace Huizhang\DelayQueue;
+namespace Huizhang\UniversalQueue\Core;
 
+use EasySwoole\Component\Singleton;
 use EasySwoole\Spl\SplBean;
 
 class Queue extends SplBean
 {
+    use Singleton;
 
     protected $alias;
     protected $redisAlias;
@@ -53,6 +55,11 @@ class Queue extends SplBean
     public function getNumber(): int
     {
         return $this->number;
+    }
+
+    public function setNumber(int $number): void
+    {
+        $this->number = $number;
     }
 
 }

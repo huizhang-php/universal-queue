@@ -6,13 +6,17 @@
  * @Description:  延迟队列对外暴露的方法
  */
 
-namespace Huizhang\DelayQueue;
+namespace Huizhang\UniversalQueue;
 
 use EasySwoole\Component\Process\Socket\UnixProcessConfig;
 use EasySwoole\Component\Singleton;
+use Huizhang\UniversalQueue\Core\ConsumerProcess;
+use Huizhang\UniversalQueue\Core\Queue;
+use Huizhang\UniversalQueue\Driver\RedisDelayQueue;
+use Huizhang\UniversalQueue\Exception\UniversalQueueException;
 use Swoole\Server;
 
-class DelayQueue
+class UniversalQueue
 {
     use Singleton;
 
@@ -24,7 +28,7 @@ class DelayQueue
         $this->config = $config;
         $queues = $this->config->getQueues();
         if (empty($queues)) {
-            throw new DelayQueueException('Queues is empty!');
+            throw new UniversalQueueException('Queues is empty!');
         }
 
         $this->checkQueues();
@@ -36,20 +40,20 @@ class DelayQueue
         /** @var $queue Queue*/
         foreach ($queues as $queue) {
             if ($queue->getCoroutineNum() < 0) {
-                throw new DelayQueueException("The coroutineNum for {$queue->getAlias()} is illegal!");
+                throw new UniversalQueueException("The coroutineNum for {$queue->getAlias()} is illegal!");
             }
             if ($queue->getLimit() < 0) {
-                throw new DelayQueueException("The limit for {$queue->getAlias()} is illegal!");
+                throw new UniversalQueueException("The limit for {$queue->getAlias()} is illegal!");
             }
             $class = new \ReflectionClass($queue->getClass());
-            if ('Huizhang\DelayQueue\ConsumerAbstract' !== $class->getParentClass()->getName()) {
-                throw new DelayQueueException("{$queue->getAlias()} consumers must implement ConsumerInterface!");
+            if ('Huizhang\UniversalQueue\Core\ConsumerAbstract' !== $class->getParentClass()->getName()) {
+                throw new UniversalQueueException("{$queue->getAlias()} consumers must implement ConsumerInterface!");
             }
             if ($queue->getDelayTime() < 0) {
-                throw new DelayQueueException("The delayTime for {$queue->getAlias()} is illegal!");
+                throw new UniversalQueueException("The delayTime for {$queue->getAlias()} is illegal!");
             }
             if (empty($queue->getRedisAlias())) {
-                throw new DelayQueueException("Alias of {$queue->getAlias()} cannot be empty!");
+                throw new UniversalQueueException("Alias of {$queue->getAlias()} cannot be empty!");
             }
         }
     }
@@ -79,15 +83,7 @@ class DelayQueue
         $queues = $this->config->getQueues();
         /** @var $queue Queue */
         $queue = $queues[$alias];
-        return Core::getInstance()->push($queue->getRedisAlias(), $queue->getAlias(), time(), $data);
-    }
-
-    public function rem(string $alias, string $data)
-    {
-        $queues = $this->config->getQueues();
-        /** @var $queue Queue */
-        $queue = $queues[$alias];
-        return Core::getInstance()->rem($queue->getRedisAlias(), $queue->getAlias(), $data);
+        return RedisDelayQueue::getInstance()->push($queue->getRedisAlias(), $queue->getAlias(), time(), $data);
     }
 
 }
