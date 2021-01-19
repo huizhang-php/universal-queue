@@ -59,9 +59,10 @@ class ConsumerProcess extends AbstractUnixProcess
                             QueueDataCache::rem($cacheFile, count($data));
                         }
                     } catch (\Throwable $e) {
+                        var_dump($e->getMessage());
                         break;
                     }
-                    Coroutine::sleep(0.01);
+                    Coroutine::sleep(1);
                 }
             });
         }

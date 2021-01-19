@@ -1,8 +1,10 @@
 # EasySwoole 通用队列组件
 
 - 支持基于Redis延迟队列
+- 支持基于Redis的队列
 - 支持消费数据先落盘防止异常丢失数据
 - 支持队列数据消费日志保留
+- 支持MemcacheQ(正在开发)
 
 > 后续会支持更多消息中间件的消费驱动
 
@@ -100,3 +102,14 @@ class EasySwooleEvent implements Event
 ````php
     UniversalQueue::getInstance()->push('test', 123);
 ````
+
+### 驱动
+
+1. redis 延迟队列
+
+`use Huizhang\UniversalQueue\Driver\RedisDelayQueue;`
+ 
+2. redis 队列
+
+`use Huizhang\UniversalQueue\Driver\RedisQueue;`
+
