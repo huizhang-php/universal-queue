@@ -35,7 +35,6 @@ class ConsumerProcess extends AbstractUnixProcess
     {
         /** @var $queue Queue */
         $queue = $arg;
-        $queue->getConsumer()->init();
         for ($i = 0; $i < $queue->getCoroutineNum(); $i++) {
             $queue->getConsumer()->queue = $queue;
             Coroutine::create(function () use ($queue, $i) {

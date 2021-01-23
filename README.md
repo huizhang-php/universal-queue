@@ -1,10 +1,11 @@
 # EasySwoole 通用队列组件
 
-- 支持基于Redis延迟队列
-- 支持基于Redis的队列
 - 支持消费数据先落盘防止异常丢失数据
 - 支持队列数据消费日志保留
-- 支持MemcacheQ(正在开发)
+- 支持基于Redis延迟队列
+- 支持基于Redis的队列
+- 支持MemcacheQ
+- 支持Kafka(正在开发)
 
 > 后续会支持更多消息中间件的消费驱动
 
@@ -20,11 +21,6 @@ class DelayQueue1 extends ConsumerAbstract
 {
 
     public $queue;
-
-    public function init()
-    {
-
-    }
 
     public function deal(array $data)
     {
@@ -44,6 +40,8 @@ use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\Redis\Config\RedisConfig;
 use Huizhang\UniversalQueue\Driver\RedisDelayQueue;
+use Huizhang\UniversalQueue\Driver\RedisQueue;
+use Huizhang\UniversalQueue\Driver\MemcacheQ;
 use Huizhang\UniversalQueue\UniversalQueue;
 use App\DelayQueue\DelayQueue1;
 
@@ -66,7 +64,7 @@ class EasySwooleEvent implements Event
         );
         $config = \Huizhang\UniversalQueue\Config::getInstance()
             ->setQueues([
-                // 队列名称
+                // 延迟队列
                 'test' => [
                     'limit' => 100, // 每个协程取出的最大消息数
                     'driver' => new RedisDelayQueue(), // 队列驱动
@@ -78,15 +76,28 @@ class EasySwooleEvent implements Event
                         'delayTime' => 3 // 延迟时间
                     ]
                 ],
-                // 队列名称
+                // redis 队列
                 'test2' => [
                     'limit' => 100, // 每个协程取出的最大消息数
-                    'driver' => new RedisDelayQueue(), // 队列驱动
+                    'driver' => new RedisQueue(), // 队列驱动
                     'consumer' => new DelayQueue1(), // 消费者
                     'coroutineNum' => 3, // 协程数
                     'other' => [
                         'redisAlias' => 'redis1', // 延迟队列redis所需配置
                         'delayTime' => 3 // 延迟时间
+                    ]
+                ],
+                // memcacheq 
+                'test3' => [
+                    'limit' => 100, // 每个协程取出的最大消息数
+                    'driver' => new MemcacheQ(), // 队列驱动
+                    'consumer' => new DelayQueue1(), // 消费者
+                    'coroutineNum' => 3, // 协程数
+                    'other' => [
+                        'servers' => [
+                            ['x.x.x.x', 11211, 3],
+                            ['x.x.x.x', 11211, 3]
+                        ]
                     ]
                 ],
             ]);
@@ -112,4 +123,8 @@ class EasySwooleEvent implements Event
 2. redis 队列
 
 `use Huizhang\UniversalQueue\Driver\RedisQueue;`
+
+3. MemcacheQ 
+
+`use Huizhang\UniversalQueue\Driver\MemcacheQ;`
 

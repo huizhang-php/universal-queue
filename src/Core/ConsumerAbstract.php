@@ -12,14 +12,6 @@ abstract class ConsumerAbstract {
     /** @var $queue Queue*/
     public $queue;
 
-    final public function __construct()
-    {
-    }
-
-    public function init() {
-
-    }
-
     abstract public function deal(array $data);
 
 }
