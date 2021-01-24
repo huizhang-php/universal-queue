@@ -21,7 +21,6 @@ class ConsumerProcess extends AbstractUnixProcess
     {
         /** @var $queue Queue */
         $queue = $config->getArg();
-        QueueDataCache::init($queue);
         $this->addTick(30000, function () use ($queue) {
             $logFile = QueueDataCache::getCurrentLogFile($queue->getAlias(), time()-60*60*$queue->getRetainLogNum());
             if (file_exists($logFile)) {
@@ -38,6 +37,7 @@ class ConsumerProcess extends AbstractUnixProcess
         for ($i = 0; $i < $queue->getCoroutineNum(); $i++) {
             $queue->getConsumer()->queue = $queue;
             Coroutine::create(function () use ($queue, $i) {
+                QueueDataCache::init($queue);
                 $cacheFile = QueueDataCache::getCoroutineCacheFile($queue->getAlias(), $i);
                 while (true) {
                     try {
@@ -58,7 +58,6 @@ class ConsumerProcess extends AbstractUnixProcess
                             QueueDataCache::rem($cacheFile, count($data));
                         }
                     } catch (\Throwable $e) {
-                        var_dump($e->getMessage());
                         break;
                     }
                     Coroutine::sleep(1);

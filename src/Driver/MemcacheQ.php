@@ -38,7 +38,12 @@ class MemcacheQ implements QueueDriverInterface
     private function getClient(Queue $queue)
     {
         $config = new Config();
-        $config->setServers($queue->getOther()['servers']);
+        $driverConfig = $queue->getDriverConfig();
+        $servers = [];
+        foreach ($driverConfig['servers'] as $item) {
+            $servers[] = explode(':', $item);
+        }
+        $config->setServers($servers);
         return new Memcache($config);
     }
 }

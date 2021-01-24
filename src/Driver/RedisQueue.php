@@ -21,7 +21,7 @@ class RedisQueue implements QueueDriverInterface
 
     public function pop(Queue $queue): array
     {
-        $other = $queue->getOther();
+        $driverConfig = $queue->getDriverConfig();
         return RedisPool::invoke(function (Redis $redis) use ($queue) {
             $result = [];
             if (empty($this->scriptSha1)) {
@@ -37,14 +37,14 @@ EOF;
                 $result = $data->getData();
             }
             return $result;
-        }, $other['redisAlias']);
+        }, $driverConfig['redisAlias']);
     }
 
     public function push(Queue $queue, string $data)
     {
-        $other = $queue->getOther();
+        $driverConfig = $queue->getDriverConfig();
         return RedisPool::invoke(function (Connection $connection) use ($queue, $data) {
             return $connection->lPush($queue->getAlias(), $data);
-        }, $other['redisAlias']);
+        }, $driverConfig['redisAlias']);
     }
 }

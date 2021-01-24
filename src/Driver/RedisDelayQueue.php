@@ -20,17 +20,16 @@ class RedisDelayQueue implements QueueDriverInterface
 
     public function push(Queue $queue, string $data)
     {
-        $other = $queue->getOther();
+        $driverConfig = $queue->getDriverConfig();
         return RedisPool::invoke(function (Redis $redis) use ($queue, $data) {
             return $redis->zAdd($queue->getAlias(), time(), $data);
-        }, $other['redisAlias']);
+        }, $driverConfig['redisAlias']);
     }
 
     public function pop(Queue $queue): array
     {
-        $other = $queue->getOther();
-        return RedisPool::invoke(function (Redis $redis) use ($queue) {
-            $other = $queue->getOther();
+        $driverConfig = $queue->getDriverConfig();
+        return RedisPool::invoke(function (Redis $redis) use ($queue, $driverConfig) {
             $result = [];
             if (empty($this->scriptSha1)) {
                 $script = <<<EOF
@@ -40,12 +39,12 @@ EOF;
                 $this->scriptSha1 = $loadResult->getData();
             }
             /** @var $data Response */
-            $data = $redis->rawCommand(['EVALSHA', $this->scriptSha1, 1, $queue->getAlias(), time() - $other['delayTime']]);
+            $data = $redis->rawCommand(['EVALSHA', $this->scriptSha1, 1, $queue->getAlias(), time() - $driverConfig['delayTime']]);
             if ($data->getStatus() === 0) {
                 $result = $data->getData();
             }
             return $result;
-        }, $other['redisAlias']);
+        }, $driverConfig['redisAlias']);
     }
 
 }

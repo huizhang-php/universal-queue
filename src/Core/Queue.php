@@ -22,7 +22,7 @@ class Queue extends SplBean
     protected $driver;
     protected $coroutineNum = 3;
     protected $retainLogNum = 3;
-    protected $other = [];
+    protected $driverConfig = [];
 
     public function getCoroutineNum()
     {
@@ -49,9 +49,9 @@ class Queue extends SplBean
         $this->number = $number;
     }
 
-    public function getOther(): array
+    public function getDriverConfig(): array
     {
-        return $this->other;
+        return $this->driverConfig;
     }
 
     public function getDriver(): QueueDriverInterface

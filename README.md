@@ -64,39 +64,40 @@ class EasySwooleEvent implements Event
         );
         $config = \Huizhang\UniversalQueue\Config::getInstance()
             ->setQueues([
-                // 延迟队列
-                'test' => [
-                    'limit' => 100, // 每个协程取出的最大消息数
+                // redis 延迟队列
+                'redis_delay_queue' => [
+                    'limit' => 3, // 每个协程取出的最大消息数
                     'driver' => new RedisDelayQueue(), // 队列驱动
                     'consumer' => new DelayQueue1(), // 消费者
                     'coroutineNum' => 1, // 协程数
-                    'retainLogNumber' => 3, // 消费日志最大保存个数(以小时分割)
-                    'other' => [
+                    'retainLogNum' => 3, // 消费日志最大保存个数(以小时分割)
+                    'driverConfig' => [
                         'redisAlias' => 'redis1', // 延迟队列redis所需配置
                         'delayTime' => 3 // 延迟时间
                     ]
                 ],
                 // redis 队列
-                'test2' => [
-                    'limit' => 100, // 每个协程取出的最大消息数
+                'redis_queue' => [
+                    'limit' => 3, // 每个协程取出的最大消息数
                     'driver' => new RedisQueue(), // 队列驱动
                     'consumer' => new DelayQueue1(), // 消费者
-                    'coroutineNum' => 3, // 协程数
-                    'other' => [
-                        'redisAlias' => 'redis1', // 延迟队列redis所需配置
-                        'delayTime' => 3 // 延迟时间
+                    'coroutineNum' => 1, // 协程数
+                    'retainLogNum' => 3, // 消费日志最大保存个数(以小时分割)
+                    'driverConfig' => [
+                        'redisAlias' => 'redis1'
                     ]
                 ],
-                // memcacheq 
-                'test3' => [
-                    'limit' => 100, // 每个协程取出的最大消息数
+                // memcacheq
+                'mcq' => [
+                    'limit' => 3, // 每个协程取出的最大消息数
                     'driver' => new MemcacheQ(), // 队列驱动
                     'consumer' => new DelayQueue1(), // 消费者
-                    'coroutineNum' => 3, // 协程数
-                    'other' => [
+                    'coroutineNum' => 1, // 协程数
+                    'retainLogNum' => 3, // 消费日志最大保存个数(以小时分割)
+                    'driverConfig' => [
                         'servers' => [
-                            ['x.x.x.x', 11211, 3],
-                            ['x.x.x.x', 11211, 3]
+                            '0.0.0.0:11211:3',
+                            '0.0.0.0:11211:3',
                         ]
                     ]
                 ],
@@ -111,7 +112,7 @@ class EasySwooleEvent implements Event
 ### 生产消息 
 
 ````php
-    UniversalQueue::getInstance()->push('test', 123);
+    UniversalQueue::getInstance()->push('redis_delay_queue', 123);
 ````
 
 ### 驱动

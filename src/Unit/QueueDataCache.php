@@ -47,7 +47,7 @@ class QueueDataCache
 
     public static function mkdir($dir)
     {
-        if (!(is_dir($dir) || @mkdir($dir, 0777))) {
+        if (!is_dir($dir)) {
             $dirArr = explode('/', $dir);
             array_pop($dirArr);
             $newDir = implode('/', $dirArr);
@@ -135,7 +135,7 @@ class QueueDataCache
         );
     }
 
-    public static function getCurrentLogFile(string $queueAlias, int $time=null)
+    public static function getCurrentLogFile(string $queueAlias, int $time = null)
     {
         if (is_null($time)) {
             $time = time();
